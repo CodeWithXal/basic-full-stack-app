@@ -107,8 +107,13 @@ function my_info(req, res){
             message : "Invalid Token"
         });
     }
+    console.log(users);
 }
 
+
+app.get("/", function(req, res){
+    res.sendFile(__dirname+"/public/index.html")
+})
 
 app.post("/signup",logger, signup_handler)
 app.post("/signin", logger, signin_handler)
