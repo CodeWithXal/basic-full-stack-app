@@ -3,6 +3,8 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const JWT_secret = "random";  //don't share this
 app.use(express.json());
+app.use(express.static("public"));
+
 
 
 //array to store users
