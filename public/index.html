@@ -1,102 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>auth</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div class="container">
 
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-    <script>
-      async function signup() {
-        const username = document.getElementById("signup-username").value;
-        const password = document.getElementById("signup-password").value;
-
-        await axios.post("http://localhost:3000/signup", {
-          username: username,
-          password: password,
-        });
-
-        alert("signed up successfully");
-      }
-
-      async function signin() {
-        const username = document.getElementById("signin-username").value;
-        const password = document.getElementById("signin-password").value;
-
-        const response = await axios.post("http://localhost:3000/signin", {
-          username: username,
-          password: password,
-        });
-
-        localStorage.setItem("token", response.data.token);
-
-        alert("signed in successfully");
-
-        getUserInformation();
-      }
-
-      async function getUserInformation() {
-        const response = await axios.get("http://localhost:3000/me", {
-          headers: {
-            Authorization: localStorage.getItem("token"),
-          },
-        });
-        document.getElementById("information").innerHTML =
-          "username :" +
-          response.data.username +
-          "    password : " +
-          response.data.password;
-      }
-
-      function logout() {
-        localStorage.removeItem("token");
-        alert("logged out successfully")
-      }
-    </script>
-  </head>
-  <body>
-    <div class="container">
-      <div class="section">
-        Signup
-        <input
-          id="signup-username"
-          type="text"
-          name="username"
-          placeholder=" username"
-        />
-        <input
-          id="signup-password"
-          type="password"
-          name="password"
-          placeholder="password"
-        />
-        <button onclick="signup()">Submit</button>
+    <!-- Tabs -->
+    <div id="auth-tabs">
+      <div class="tabs">
+        <button class="tab active" onclick="openTab('signup')">Signup</button>
+        <button class="tab" onclick="openTab('signin')">Signin</button>
       </div>
 
-      <div class="section">
-        Signin
-        <input
-          id="signin-username"
-          type="text"
-          name="username"
-          placeholder=" username"
-        />
-        <input
-          id="signin-password"
-          type="password"
-          name="password"
-          placeholder="password"
-        />
-        <button onclick="signin()">Submit</button>
+      <!-- Signup Form -->
+      <div id="signup" class="tab-content active">
+        <h2>Create Account</h2>
+        <div class="form-group">
+          <label for="signup-username">Username</label>
+          <input id="signup-username" type="text" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input id="signup-password" type="password" placeholder="Enter password">
+        </div>
+        <button class="signup" onclick="signup()">Sign Up</button>
       </div>
-      <div class="section">
-        <div id="information">User Information</div>
-      </div>
-      <div class="section">
-        <button onclick="logout()">logout</button>
+
+      <!-- Signin Form -->
+      <div id="signin" class="tab-content">
+        <h2>Welcome Back</h2>
+        <div class="form-group">
+          <label for="signin-username">Username</label>
+          <input id="signin-username" type="text" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label for="signin-password">Password</label>
+          <input id="signin-password" type="password" placeholder="Enter password">
+        </div>
+        <button class="signin" onclick="signin()">Sign In</button>
       </div>
     </div>
-  </body>
+
+    <!-- User Info + Logout (hidden initially) -->
+    <div id="user-panel" style="display: none;">
+      <div id="information" class="section">
+        User Information will appear here
+      </div>
+      <div class="section">
+        <button class="logout" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openTab(tabId) {
+      // Hide all tab contents
+      document.querySelectorAll(".tab-content").forEach(tab => {
+        tab.classList.remove("active");
+      });
+      // Deactivate all tabs
+      document.querySelectorAll(".tab").forEach(button => {
+        button.classList.remove("active");
+      });
+      // Show selected tab
+      document.getElementById(tabId).classList.add("active");
+      event.target.classList.add("active");
+    }
+
+    async function signup() {
+      const username = document.getElementById("signup-username").value;
+      const password = document.getElementById("signup-password").value;
+
+      await axios.post("http://localhost:3000/signup", { username, password });
+      alert("Signed up successfully!");
+    }
+
+    async function signin() {
+      const username = document.getElementById("signin-username").value;
+      const password = document.getElementById("signin-password").value;
+
+      try {
+        const response = await axios.post("http://localhost:3000/signin", { username, password });
+        localStorage.setItem("token", response.data.token);
+
+        alert("Signed in successfully!");
+
+        // Hide signup/signin tabs, show user panel
+        document.getElementById("auth-tabs").style.display = "none";
+        document.getElementById("user-panel").style.display = "block";
+
+        getUserInformation();
+      } catch (err) {
+        alert("Invalid username or password");
+      }
+    }
+
+    async function getUserInformation() {
+      const response = await axios.get("http://localhost:3000/me", {
+        headers: { Authorization: localStorage.getItem("token") }
+      });
+      document.getElementById("information").innerHTML =
+        "Username: " + response.data.username + "<br>Password: " + response.data.password;
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      document.getElementById("auth-tabs").style.display = "block";
+      document.getElementById("user-panel").style.display = "none";
+    }
+  </script>
+</body>
 </html>
